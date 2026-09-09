@@ -1,22 +1,18 @@
-import eBayApi from 'ebay-api';
+export default function handler(req, res) {
+  const { code, error, error_description } = req.query;
 
-export default async function handler(req, res) {
-  const { code } = req.query;
-  if (!code) return res.status(400).send('Missing code');
+  if (error) {
+    return res.status(400).send(`<h2>Auth failed</h2><p>${error}: ${error_description}</p>`);
+  }
 
-  const ebay = new eBayApi({
-    appId: process.env.APP_ID,
-    certId: process.env.CERT_ID,
-    devId: process.env.DEV_ID,
-    sandbox: process.env.EBAY_ENV === 'SANDBOX',
-    ruName: process.env.EBAY_RUNAME,
-  });
-
-  const token = await ebay.auth.oAuth2.getToken(code);
+  if (!code) {
+    return res.status(400).send('<h2>No code received</h2>');
+  }
 
   res.status(200).send(`
-    <h2>Tokens — copy these into your .env</h2>
-    <p><b>EBAY_ACCESS_TOKEN=</b>${token.access_token}</p>
-    <p><b>EBAY_REFRESH_TOKEN=</b>${token.refresh_token}</p>
+    <h2>Almost done!</h2>
+    <p>Copy this code and paste it into the terminal:</p>
+    <textarea rows="4" cols="80">${code}</textarea>
+    <p>Then run: <code>node scripts/exchange-token.js &lt;code&gt;</code></p>
   `);
 }
